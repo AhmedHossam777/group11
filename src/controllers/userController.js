@@ -1,64 +1,94 @@
 const User = require( './../model/User' );
+const {mongoose, Types} = require( 'mongoose' );
 
 const createUser = async ( req, res ) => {
 	try {
-		const data = req.body;
-		const newUser = await User.create( data );
+		const userData = req.body;
+		const newUser = await User.create( userData );
 		
 		res.status( 201 ).json( {
-			message: 'user created',
-			newUser,
+			message: 'user created successfully',
+			user: newUser,
 		} );
 	} catch (e) {
 		throw new Error( e.message );
 	}
+	
 };
 
-// User.findById()
-//  User.findByIdAndUpdate()
 const getAllUser = async ( req, res ) => {
 	try {
-		const users = await User.find();
+		const allUsers = await User.find();
 		res.status( 200 ).json( {
 			message: 'all users fetched',
-			users,
+			users: allUsers,
 		} );
 		
 	} catch (e) {
 		throw new Error( e.message );
 	}
 };
-const getOneUser = ( req, res ) => {
-	const id = parseInt( req.params.id );
-	const user = users.find( ( u ) => u.id === id );
-	
-	if (!user) {
-		res.status( 404 ).json( 'user not found' );
+const getOneUser = async ( req, res ) => {
+	try {
+		const id = req.params.id;
+		
+		const user = await User.findById( id );
+		
+		if (!user) {
+			res.status( 404 ).json( {
+				message: 'user not found',
+			} );
+		}
+		
+		res.status( 200 ).json( {
+			message: 'one user fetched',
+			user,
+		} );
+		
+	} catch (e) {
+		throw new Error( e.message );
 	}
 	
-	res.status( 200 ).json( ({
-		message : "get one user",
-		user,
-	}) );
 };
 
 const updateUser = async ( req, res ) => {
-	const id = req.params.id;
-	const user = await User.findByIdAndUpdate(id, req.body)
-	res.status( 200 ).json( {
-		user,
-	} );
+	try {
+		const id = req.params.id;
+		const newData = req.body;
+		const updatedUser = await User.findByIdAndUpdate( id, newData, {new: true} );
+		
+		if (!updatedUser) {
+			res.status( 404 ).json( {
+				message: 'user not found',
+			} );
+		}
+		
+		res.status( 200 ).json( {
+			message: 'users updated successfully',
+			updatedUser,
+		} );
+	} catch (e) {
+		throw new Error( e.message );
+	}
 };
 
-const deleteUser = ( req, res ) => {
-	const id = req.params.id;
-	const index = users.findIndex( u => u.id === parseInt( id ) );
-	
-	// console.log( 'array before delete: ', users );
-	const deletedUser = users.splice( index, 1 );
-	console.log( 'deletedUser : ', deletedUser );
-	// console.log( 'array after delete: ', users );
-	res.status( 204 ).json( deletedUser[0] );
+const deleteUser = async ( req, res ) => {
+	try {
+		const id = req.params.id;
+		const deletedUser = await User.findByIdAndDelete( id );
+		
+		if (!deletedUser) {
+			res.status( 404 ).json( {
+				message: 'user not found',
+			} );
+		}
+		
+		res.status( 200 ).json( {
+			message: 'user deleted successfully',
+		} );
+	} catch (e) {
+		throw new Error( e.message );
+	}
 };
 
 module.exports = {
