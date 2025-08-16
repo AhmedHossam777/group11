@@ -1,19 +1,22 @@
 const User = require( './../model/User' );
 const {mongoose, Types} = require( 'mongoose' );
-
-const createUser = async ( req, res ) => {
+const {AppError} = require( '../config/AppError' );
+const createUser = async ( req, res, next ) => {
 	try {
 		const userData = req.body;
 		const newUser = await User.create( userData );
+		
+		if (!newUser) {
+			throw new AppError( 'user isn\'t created', 400 );
+		}
 		
 		res.status( 201 ).json( {
 			message: 'user created successfully',
 			user: newUser,
 		} );
 	} catch (e) {
-		throw new Error( e.message );
+		next( e );
 	}
-	
 };
 
 const getAllUser = async ( req, res ) => {
@@ -25,20 +28,20 @@ const getAllUser = async ( req, res ) => {
 		} );
 		
 	} catch (e) {
-		throw new Error( e.message );
+		next( e );
 	}
 };
-const getOneUser = async ( req, res ) => {
+const getOneUser = async ( req, res, next ) => {
 	try {
 		const id = req.params.id;
 		
 		const user = await User.findById( id );
 		
 		if (!user) {
-			res.status( 404 ).json( {
-				message: 'user not found',
-			} );
+			throw new AppError( 'user not found', 404 );
 		}
+		
+		//? Middleware : catch any errors in the application
 		
 		res.status( 200 ).json( {
 			message: 'one user fetched',
@@ -46,21 +49,19 @@ const getOneUser = async ( req, res ) => {
 		} );
 		
 	} catch (e) {
-		throw new Error( e.message );
+		next( e );
 	}
 	
 };
 
-const updateUser = async ( req, res ) => {
+const updateUser = async ( req, res, next ) => {
 	try {
 		const id = req.params.id;
 		const newData = req.body;
 		const updatedUser = await User.findByIdAndUpdate( id, newData, {new: true} );
 		
 		if (!updatedUser) {
-			res.status( 404 ).json( {
-				message: 'user not found',
-			} );
+			throw new AppError( 'user not found', 404 );
 		}
 		
 		res.status( 200 ).json( {
@@ -68,26 +69,24 @@ const updateUser = async ( req, res ) => {
 			updatedUser,
 		} );
 	} catch (e) {
-		throw new Error( e.message );
+		next( e );
 	}
 };
 
-const deleteUser = async ( req, res ) => {
+const deleteUser = async ( req, res, next ) => {
 	try {
 		const id = req.params.id;
 		const deletedUser = await User.findByIdAndDelete( id );
 		
 		if (!deletedUser) {
-			res.status( 404 ).json( {
-				message: 'user not found',
-			} );
+			throw new AppError( 'user not found', 404 );
 		}
 		
 		res.status( 200 ).json( {
 			message: 'user deleted successfully',
 		} );
 	} catch (e) {
-		throw new Error( e.message );
+		next( e );
 	}
 };
 

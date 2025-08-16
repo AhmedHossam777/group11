@@ -12,11 +12,18 @@ app.use( ( req, res, next ) => {
 app.use( express.json() );
 
 app.use( '/users', userRouter );
-// app.use('/payment', paymentRouter)
+
+app.use( ( err, req, res, next ) => {
+	const statusCode = err.statusCode || 500;
+	res.status( statusCode ).json( {
+		status: 'error',
+		message: err.message,
+	} );
+} );
 
 connectDb();
 const port = 3000;
 
-app.listen( 3000,  () => {
+app.listen( 3000, () => {
 	console.log( `app is running on port ${port}` );
 } );
