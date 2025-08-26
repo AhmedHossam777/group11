@@ -1,13 +1,14 @@
 const mongoose = require( 'mongoose' );
+const bcrypt = require( 'bcryptjs' );
 
 const userSchema = new mongoose.Schema( {
 	name: {
 		type: String,
-		required : true
+		required: true,
 	},
 	age: {
 		type: Number,
-		required: true
+		required: true,
 	},
 	email: {
 		type: String,
@@ -15,15 +16,30 @@ const userSchema = new mongoose.Schema( {
 	},
 	password: {
 		type: String,
-		required: true
+		required: true,
 	},
 	job: {
 		type: String,
 	},
 }, {
-	versionKey: false,
-	validateBeforeSave: true
+	timestamps: true,
+	validateBeforeSave: true,
 } );
+
+
+userSchema.pre( 'save', async function ( next ) {
+	if (!this.isModified("password")) return next()
+	
+	const salt = await bcrypt.genSalt( 10 );
+	console.log("salt: ", salt);
+	this.password = await bcrypt.hash( this.password, salt );
+	next();
+} );
+
+// compare method
+userSchema.methods.comparePassword = async function(candidatePassword){
+	return await bcrypt.compare(candidatePassword, this.password)
+}
 
 const User = mongoose.model( 'User', userSchema );
 

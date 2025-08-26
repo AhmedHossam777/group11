@@ -12,7 +12,10 @@ app.use( ( req, res, next ) => {
 app.use( express.json() );
 
 app.use( '/users', userRouter );
+// app.use('/posts', postRouter)
 
+
+// Global error handling middleware
 app.use( ( err, req, res, next ) => {
 	const statusCode = err.statusCode || 500;
 	res.status( statusCode ).json( {
@@ -20,6 +23,7 @@ app.use( ( err, req, res, next ) => {
 		message: err.message,
 	} );
 } );
+
 
 connectDb();
 const port = 3000;
