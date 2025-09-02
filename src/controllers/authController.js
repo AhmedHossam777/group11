@@ -1,5 +1,4 @@
 const User = require( './../model/User' );
-const {mongoose, Types} = require( 'mongoose' );
 const {AppError} = require( '../config/AppError' );
 const errorWrapper = require( 'express-async-handler' );
 const {generateToken} = require( '../utils/token' );
@@ -13,7 +12,6 @@ const signup = errorWrapper( async ( req, res, next ) => {
 	}
 	
 	console.log( newUser );
-	
 	const token = generateToken( newUser._id, newUser.email );
 	
 	res.status( 201 ).json( {
@@ -22,7 +20,6 @@ const signup = errorWrapper( async ( req, res, next ) => {
 		token,
 	} );
 } );
-
 const login = errorWrapper(
 	async ( req, res, next ) => {
 		const {email, password} = req.body;

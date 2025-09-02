@@ -17,17 +17,6 @@ const createUser = errorWrapper( async ( req, res, next ) => {
 	} );
 } );
 
-const getMyAccount = errorWrapper( async ( req, res, next ) => {
-	console.log(req.user.id);
-	const userId = req.user.id;
-	
-	const user = await User.findById( userId );
-	res.status(200).json({
-		message: "this is my account" ,
-		user
-	})
-} );
-
 const getAllUser = errorWrapper( async ( req, res ) => {
 	console.log( `user that sending request is: ${req.user.id}, ${req.user.email}` );
 	const allUsers = await User.find();
@@ -86,33 +75,18 @@ const deleteUser = errorWrapper( async ( req, res, next ) => {
 	},
 );
 
-const login = errorWrapper( async ( req, res ) => {
-	//? get email and passwor from user
-	const {email, password} = req.body;
-	
-	if (!email || !password) throw new AppError( 'add email and password', 400 );
-	console.log( password );
-	
-	//? find User by Email
-	const existedUser = await User.findOne( {email: email} );
-	console.log( 'existing user:', existedUser );
-	
-	//! throw error if no user with that email
-	if (!existedUser) {
-		throw new AppError( 'wrong email or password', 400 );
-	}
-	
-	//? check if user password is match with the entered password
-	const isCorrectPassword = await existedUser.comparePassword( password );
-	if (!isCorrectPassword) {
-		throw new AppError( 'wrong email or password', 400 );
-	}
-	console.log( 'is correct password: ', isCorrectPassword );
+const getMyProfile = errorWrapper( async ( req, res, next ) => {
+	const userId = req.user.id;
+	const user = await User.findById( userId );
 	
 	res.status( 200 ).json( {
-		message: 'user logged in successfully',
+		message: 'get my profile',
+		user,
 	} );
 } );
+
+// products : [userId1, userId2 ......]
+
 
 module.exports = {
 	getAllUser,
@@ -120,6 +94,5 @@ module.exports = {
 	deleteUser,
 	updateUser,
 	getOneUser,
-	login,
-	getMyAccount
+	getMyProfile
 };

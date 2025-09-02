@@ -9,7 +9,8 @@ const generateToken = ( userId , email) => {
 };
 
 const verifyToken = (token) => {
-	const decoded = jwt.decode(token, process.env.JWT_SECRET)
+	const decoded = jwt.verify(token, process.env.JWT_SECRET)
+	console.log(decoded);
 	if (!decoded){
 		throw new AppError('invalid token', 400)
 	}

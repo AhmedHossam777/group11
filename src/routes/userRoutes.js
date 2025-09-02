@@ -6,7 +6,7 @@ const {
 	getOneUser,
 	updateUser,
 	deleteUser,
-	getMyAccount
+	getMyProfile
 } = require( '../controllers/userController' );
 const {signup,login} = require( '../controllers/authController' );
 const {auth} = require( '../middlewares/authMiddleware' );
@@ -15,7 +15,7 @@ const userRouter = express.Router();
 
 userRouter.route( '/' ).get( auth,getAllUser ).post( createUser );
 
-userRouter.route('/me').get( getMyAccount)
+userRouter.route('/myProfile').get(auth, getMyProfile)
 
 userRouter.route( '/:id' ).get( auth,getOneUser ).patch( auth,updateUser ).delete( auth,deleteUser );
 
