@@ -18,14 +18,37 @@ const createUser = errorWrapper( async ( req, res, next ) => {
 } );
 
 const getAllUser = errorWrapper( async ( req, res ) => {
-	console.log( `user that sending request is: ${req.user.id}, ${req.user.email}` );
-	const allUsers = await User.find();
+	const page = parseInt( req.query.page ) || 1;
+	const limit = parseInt( req.query.limit ) || 10;
+	
+	const skip = (page - 1) * limit; // page=2  -> 10
+	
+	// 21 user -> limit = 10 -> 10 users
+	// 21 -> skip = 10 -> (11 -> 20)
+	console.log( `page: ${page}, limit:${limit}` );
+	const search = req.query.search || "";
+	const filter = {
+		$or: [
+			{
+				name: {$regex: search, $options: 'i'}
+			},
+		],
+	};
+	// name = hossam
+	
+	const allUsers = await User.find( filter ).skip( skip ).limit( limit );
+	
 	res.status( 200 ).json( {
 		message: 'all users fetched',
 		users: allUsers,
+		count: allUsers.length,
+		page: page,
+		limit: limit,
 	} );
-	
 } );
+
+// http://localhost:3000/users?page=2
+// req.query.page = 2
 const getOneUser = errorWrapper( async ( req, res, next ) => {
 	const id = req.params.id;
 	
@@ -87,12 +110,11 @@ const getMyProfile = errorWrapper( async ( req, res, next ) => {
 
 // products : [userId1, userId2 ......]
 
-
 module.exports = {
 	getAllUser,
 	createUser,
 	deleteUser,
 	updateUser,
 	getOneUser,
-	getMyProfile
+	getMyProfile,
 };
