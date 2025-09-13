@@ -1,5 +1,6 @@
 const express = require( 'express' );
 const userRouter = require( './routes/userRoutes' );
+const postRouter = require('./routes/postRoutes');
 const connectDb = require( './config/connectDb' );
 
 const app = express();
@@ -12,8 +13,7 @@ app.use( ( req, res, next ) => {
 app.use( express.json() );
 
 app.use( '/users', userRouter );
-// app.use('/posts', postRouter)
-
+app.use('/posts', postRouter);
 
 // Global error handling middleware
 app.use( ( err, req, res, next ) => {
