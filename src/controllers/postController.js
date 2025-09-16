@@ -3,7 +3,10 @@ const errorWrapper = require( 'express-async-handler' );
 const {AppError} = require( '../config/AppError' );
 
 const createPost = errorWrapper( async ( req, res ) => {
+	const authorId = req.user.id;
 	const data = req.body;
+	
+	data.author = authorId;
 	
 	const newPost = await Post.create( data );
 	if (!newPost) throw new AppError( 'post is not created', 400 );
@@ -26,6 +29,7 @@ const getAllPosts = errorWrapper( async ( req, res ) => {
 	} : {};
 	
 	const posts = await Post.find( filter ).skip( skip ).limit( limit ).sort( {createdAt: -1} );
+	
 	res.status( 200 ).json( {
 		message: 'all posts fetched',
 		posts,
@@ -37,7 +41,7 @@ const getAllPosts = errorWrapper( async ( req, res ) => {
 
 const getOnePost = errorWrapper( async ( req, res ) => {
 	const {id} = req.params;
-	const post = await Post.findById( id );
+	const post = await Post.findById( id ).populate( 'author' );
 	if (!post) throw new AppError( 'post not found', 404 );
 	res.status( 200 ).json( {
 		message: 'one post fetched',
@@ -65,10 +69,30 @@ const deletePost = errorWrapper( async ( req, res ) => {
 	} );
 } );
 
+const getMyPosts = errorWrapper(
+	async ( req, res ) => {
+		
+		const page = parseInt( req.query.page ) || 1;
+		const limit = parseInt( req.query.limit ) || 10;
+		const skip = (page - 1) * limit;
+		const authorId = req.user.id;
+		
+		const posts = await Post.find( {
+			author: authorId,
+		} ).populate( 'author' ).skip( skip ).limit( limit );
+		
+		res.status( 200 ).json( {
+			message: 'this is your posts',
+			posts,
+		} );
+	},
+);
+
 module.exports = {
 	createPost,
 	getAllPosts,
 	getOnePost,
 	updatePost,
 	deletePost,
+	getMyPosts,
 };
